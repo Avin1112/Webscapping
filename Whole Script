@@ -1,0 +1,849 @@
+import pandas as pd
+import numpy as np
+import requests
+from bs4 import BeautifulSoup
+import datetime
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+url = "https://www.flipkart.com/search?q=laptops&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off"
+
+response = requests.get(url)
+print(response)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+if response.status_code==200:
+    html_text=response.content
+    print(html_text)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+soup = BeautifulSoup(html_text,'lxml')
+print(soup.prettify())
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Extracting only the contents of first and one product on the webpage
+
+product1 = soup.find('a','_1fQZEK')
+product1
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product name
+
+try:
+    name = product1.find('div','_4rR01T').get_text()
+except AttributeError as obj:
+    name = "N/A"
+
+name = product1.find('div','_4rR01T').get_text()
+name
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's img link
+
+try:
+    img_tab = product1.find('img')['src']
+    img_link = img_tab
+except AttributeError as obj:
+    img_link = "N/A"
+
+img_tab = product1.find('img')['src']
+img_link
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product specifications
+
+try:
+    specs = product1.find('ul','_1xgFaf').get_text()
+except AttributeError as obj:
+    specs = "N/A"
+
+specs
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's current offered price on website
+
+try:
+    after_discount_price = product1.find('div','_30jeq3 _1_WHN1').get_text()
+except AttributeError as obj:
+    after_discount_price = 0
+
+after_discount_price
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's price without discount
+
+try:
+    original_price = product1.find('div','_3I9_wc _27UcVY').get_text()
+except AttributeError as obj:
+    original_price = 0
+
+original_price
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's rating
+
+try:
+    rating = product1.find('div','_3LWZlK').get_text()
+except AttributeError as obj:
+    rating = 0
+rating
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's total number of rating received from customers
+
+try:
+    total_ratings = product1.find('span','_2_R_DZ')
+    total_ratings = total_ratings.get_text()
+    total_ratings = total_ratings[0:11]
+except AttributeError as obj:
+    total_ratings = 0
+
+total_ratings
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's total number reviews received from customers
+
+try:
+    total_reviews = product1.find('span','_2_R_DZ')
+    total_reviews = total_reviews.get_text()
+    total_reviews = total_reviews[-10:]
+except AttributeError as obj:
+        total_reviews = 0
+
+total_reviews
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the dicount (%) offered on the Product from Flipkart
+
+try:
+    discount_perc = product1.find('div','_3Ay6Sb')
+    discount_perc = product1.find('div','_3Ay6Sb').get_text()
+except AttributeError as obj:
+    discount_perc = '%'
+
+discount_perc
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Extracting the Product's link 
+
+try:
+    domain = "www.flipkart.com"
+    product_link = domain + product1['href']
+except TypeError as obj:
+    product_link = "N/A"
+except AttributeError as obj:
+    product_link = "N/A"
+
+product_link
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# for only very first product on the webpage
+
+f1 = []
+d1={}
+
+try:
+    d1['name'] = product1.find('div','_4rR01T').get_text()
+except AttributeError as obj:
+    d1['name'] = "N/A"
+
+try:
+    d1['img_link'] = product1.find('img')['src']
+except AttributeError as obj:
+    d1['img_link'] = "N/A"
+
+try:
+    d1['specs'] = product1.find('ul','_1xgFaf').get_text()
+except AttributeError as obj:
+    d1['specs'] = "N/A"
+
+try:
+    d1['after_discount_price'] = product1.find('div','_30jeq3 _1_WHN1').get_text()
+except AttributeError as obj:
+    d1['after_discount_price'] = 0
+
+try:
+    d1['original_price'] = product1.find('div','_3I9_wc _27UcVY').get_text()
+except AttributeError as obj:
+   d1['original_price'] = 0
+
+try:
+    d1['rating'] = product1.find('div','_3LWZlK').get_text()
+except AttributeError as obj:
+    d1['rating'] = 0
+    
+try:
+    d1['total_ratings'] = product1.find('span','_2_R_DZ').get_text()[0:7]
+except AttributeError as obj:
+    d1['total_ratings'] = 0
+
+
+try:
+    d1['total_reviews'] = product1.find('span','_2_R_DZ').get_text()[-12:-8]
+except AttributeError as obj:
+    d1['total_reviews'] = 0
+
+try:
+    d1['discount_perc'] = product1.find('div','_3Ay6Sb').get_text()
+except AttributeError as obj:
+    d1['discount_perc'] = '%'
+
+try:
+    domain = "www.flipkart.com"
+    d1['Product link'] = domain + product1['href']
+except AttributeError as obj:
+    d1['Product link'] = "N/A"
+except TypeError as obj:
+    d1['Product link'] = "N/A"
+
+d1['data extracted on'] = str(date).replace("datetime.date(","").replace(")}]","")
+
+f1.append(d1)
+
+
+f1
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Now Extracting the contents of all the products displayed on the webpage , Page - 1
+
+product_all = soup.find_all('a','_1fQZEK')
+product_all
+
+
+flipkart = []
+
+
+for i in product_all:
+    d = {}
+    try:
+        d['name'] = i.find('div','_4rR01T').get_text()
+    except AttributeError as obj:
+        d['name'] = "N/A"
+    try:
+        d['img_link'] = i.find('img')['src']
+    except AttributeError as obj:
+        d['img_link'] = "N/A"
+    try:
+        d['specs'] = i.find('ul','_1xgFaf').get_text()
+    except AttributeError as obj:
+        d['specs'] = "N/A"
+    try:
+        d['after_discount_price'] = i.find('div','_30jeq3 _1_WHN1').get_text()
+    except AttributeError as obj:
+        d['after_discount_price'] = 0
+    try:
+        d['original_price'] = i.find('div','_3I9_wc _27UcVY').get_text()
+    except AttributeError as obj:
+        d['original_price'] = 0
+    try:
+        d['rating'] = i.find('div','_3LWZlK').get_text()
+    except AttributeError as obj:
+        d['rating'] = 0
+    try:
+        d['total_ratings'] = i.find('span','_2_R_DZ').get_text()[0:11]
+    except AttributeError as obj:
+        d['total_ratings'] = 0
+    try:
+        d['total_reviews'] = i.find('span','_2_R_DZ').get_text()[-10:]
+    except AttributeError as obj:
+        d['total_reviews'] = 0
+    try:
+        d['discount_perc'] = i.find('div','_3Ay6Sb').get_text()
+    except AttributeError as obj:
+        d['discount_perc'] = '%'
+    try:
+        domain = "www.flipkart.com"
+        d['Product link'] = domain + i['href']
+    except:
+        d['Product link'] = "N/A"
+        
+    d['data extracted on'] = str(date).replace("datetime.date(","").replace(")}]","")
+    
+    flipkart.append(d)
+
+flipkart
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+data = pd.json_normalize(flipkart)
+data[:1]
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Now Extracting the contents of all the products displayed on every webpage , from Page Number - 1 to Page Number - 80
+
+# for all the products on the all the webpage 
+
+flipkart = []
+
+for page_no in range(1,81):
+    url = f"https://www.flipkart.com/search?q=laptops&otracker=search&otracker1=search&marketplace=FLIPKART&as-show=on&as=off&page={page_no}"
+    if response.status_code==200:
+        html_text=response.content
+        soup = BeautifulSoup(html_text,'lxml')
+        product_all = soup.find_all('a','_1fQZEK')
+    
+        for i in product_all:
+            d = {}
+            try:
+                d['name'] = i.find('div','_4rR01T').get_text()
+            except AttributeError as obj:
+                d['name'] = "N/A"
+            try:
+                d['img_link'] = i.find('img')['src']
+            except AttributeError as obj:
+                d['img_link'] = "N/A"
+            try:
+                d['specs'] = i.find('ul','_1xgFaf').get_text()
+            except AttributeError as obj:
+                d['specs'] = "N/A"
+            try:
+                d['after_discount_price'] = i.find('div','_30jeq3 _1_WHN1').get_text()
+            except AttributeError as obj:
+                d['after_discount_price'] = "0"
+            try:
+                d['original_price'] = i.find('div','_3I9_wc _27UcVY').get_text()
+            except AttributeError as obj:
+                d['original_price'] = "0"
+            try:
+                d['rating'] = i.find('div','_3LWZlK').get_text()
+            except AttributeError as obj:
+                d['rating'] = "0"
+            try:
+                d['total_ratings'] = i.find('span','_2_R_DZ').get_text()[0:11]
+            except AttributeError as obj:
+                d['total_ratings'] = "0"
+            try:
+                d['total_reviews'] = i.find('span','_2_R_DZ').get_text()[-10:]
+            except AttributeError as obj:
+                d['total_reviews'] = "0"
+            try:
+                d['discount_perc'] = i.find('div','_3Ay6Sb').get_text()
+                domain = "www.flipkart.com"
+                d['Product link'] = domain + i['href']
+            except:
+                d['Product link'] = "N/A"
+                
+            d['data extracted on'] = str(date).replace("datetime.date(","").replace(")}]","")
+            
+            flipkart.append(d)
+    print(f"Extraction from Page Number {page_no} is completed")
+
+flipkart
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+data = pd.json_normalize(flipkart)
+data.head()
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+df.index
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+df.info()
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Creating a Column in DataFrame df "Brand Name"
+
+
+df['Brand Name'] = df['name'].str.split(expand=True)[0]
+df.head(1)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Removing unnecessary strings/characters from columns ==> "after_discount_price" and "original_price" to convert later into interger datatype columns. For example ==>  " , "  , " ₹ "    
+
+
+df['after_discount_price'] = df['after_discount_price'].str.replace(',','')
+df['after_discount_price'] = df['after_discount_price'].str.replace("₹","")
+
+df['original_price'] = df['original_price'].str.replace(',','')
+df['original_price'] = df['original_price'].str.replace("₹","").replace(',','')
+
+df[['original_price','after_discount_price']]
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Removing unnecessary strings/characters from columns ==> "'total_ratings" and "total_reviews" to convert later into interger datatype columns. For example ==> alphabets , whites paces and special characters
+
+def remove_alpha(n):
+    for i in n:
+        if i.isalpha():
+            n = n.replace(i,"")
+        if i.isspace():
+            n = n.replace(i,"")
+        if i==',':
+            n = n.replace(i,"")
+        if i=='&':
+            n = n.replace(i,"")
+    return n
+
+df['total_ratings'] = df['total_ratings'].apply(remove_alpha)
+df['total_reviews'] = df['total_reviews'].apply(remove_alpha)
+df[['total_ratings','total_reviews']]
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Removing unnecessary strings/characters from column  "discount %" convert it later into interger datatype columns. For example ==> alphabets , whites paces and special characters
+
+df['discount %'] = df['discount %'].str.replace(" ","")
+df['discount %'] = df['discount %'].str.replace("%","")
+df['discount %'] = df['discount %'].str.replace("off","")
+df['discount %'].head()
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Changing the Column Names
+col_names = list(df.columns)
+col_names
+
+df.columns = ['model description',
+ 'IMG link',
+ 'specifications',
+ 'price after discount',
+ 'price before discount',
+ 'rating',
+ 'total ratings',
+ 'total reviews',
+ 'discount %',
+ 'web page product link',
+ 'brand name']
+
+df[:3]
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Rearranging the columns in proper oder from left to right
+col = list(df.columns)
+col
+
+df = df[[col[10]]+[col[0]]+col[2:4]+[col[8]]+col[4:8]+[col[9]]+[col[1]] ]
+df.head()
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+df.info()
+
+## Cleaning the the NULL/NAN values in whole DataFrame using " fillna() "
+
+df = df.fillna({'brand name' : 'N/A' , 'model description' : 'N/A' , 'specifications' : 'N/A' , 'price after discount' : 0 ,
+          'discount %' : 0 , 'price after discount' : 0 , 'rating' : 0 , 'total ratings' : 0 , 'total reviews' : 0 ,
+          'web page link' : 'N/A' , 'IMG link' : 'N/A'})
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Changing the data type of each column in a DataFarme to proper datatype. 
+
+df['price after discount'] = df['price after discount'].astype(int)
+df['price before discount'] = df['price after discount'].astype(int)
+df['rating'] = df['rating'].astype(float)
+df['total ratings'] = df['total ratings'].astype(int)
+df['total reviews'] = df['total reviews'].astype(int)
+df['discount %'] = df['discount %'].astype(int)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Analyzing the data
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# What is the average price of the laptops in the dataframe?
+
+avg_price_laptop = df['price after discount'].mean()
+
+print(f"average price of the laptops in the dataframe is Rupees {int(avg_price_laptop)} .")
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# How many unique brands are present in the dataset?
+
+unique_brand = df['brand name'].nunique()
+unique_brand
+
+unique_brand_name = df['brand name'].unique()
+unique_brand_name
+
+print(f"Total unique brands in the Dataset is {unique_brand} .")
+print()
+print(f"Unique brands in the Dataset are :")
+for i in unique_brand_name:
+    print(i,sep=",",end="     ")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the highest discount percentage among all the laptops?
+
+df['discount %'].max()
+
+top_brand_discounted = list(  df.loc[df['discount %'] == df['discount %'].max()]['brand name'].unique()  )
+
+print(f"Highest discount percentage among all the laptops is {df['discount %'].max()}% and brand is/are : ")
+for i in top_brand_discounted:
+    print(i,end="      ")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Which brand has the maximum number of products listed?
+
+## Method 1
+df.groupby('brand name')['brand name'].count().sort_values(ascending=False).idxmax()
+
+## Method 2
+df['brand name'].value_counts().idxmax()
+
+print(df.groupby('brand name')['brand name'].count().sort_values(ascending=False))
+print()
+print(f"'{df['brand name'].value_counts().idxmax()}' brand has the maximum number of products listed .")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the average rating of all the laptops?
+
+df['rating'].mean()
+
+print(f"Average rating of all the laptops is {round( df['rating'].mean() , 1)} .")
+
+print()
+
+print("Average rating of laptops for all the brands on Flipkart")
+df.groupby('brand name')['rating'].mean()
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the correlation between the price and the rating of the laptops?
+
+price_corr_rating = round( df['price after discount'].corr(df['rating']) , 2 )
+
+print(f"Correlation between the price and the rating of the laptops is {price_corr_rating} .")
+
+if 1>=price_corr_rating>=0.8:
+    print(f"{price_corr_rating} refers to very strong positive correlation")
+elif 0.8>=price_corr_rating>=0.6:
+    print(f"{price_corr_rating} refers to strong positive correlation")
+elif 0.6>=price_corr_rating>=0.4:
+    print(f"{price_corr_rating} refers to moderate positive correlation")
+elif 0.4>=price_corr_rating>=0.2:
+    print(f"{price_corr_rating} refers to weak positive correlation")
+elif 0.2>=price_corr_rating>0.0:
+    print(f"{price_corr_rating} refers to very weak positive correlation")
+elif reviews_corr_ratings == 0:
+    print(f"{price_corr_rating} refers to no correlation")
+elif 0.0>reviews_corr_ratings>= - (0.2) :
+    print(f"{price_corr_rating} refers to very weak negative correlation")
+elif - (0.2) >=price_corr_rating>= - (0.4) :
+    print(f"{price_corr_rating} refers to weak negative correlation")
+elif - (0.4) >=price_corr_rating>= - (0.6) :
+    print(f"{price_corr_rating} refers to moderate negative correlation")
+elif - (0.6) >=price_corr_rating>= - (0.8) :
+    print(f"{price_corr_rating} refers to strong negative correlation")
+elif - (0.8) >=price_corr_rating>= - (1.0) :
+    print(f"{price_corr_rating} refers to very strong negative correlation")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the distribution of ratings across all the products?
+
+df['rating'].value_counts().reset_index()
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# How many products have a rating above 4.0?
+
+print(f"{( df['rating']>=4.5 ).sum()} of products (laptops) have a rating above 4.5")
+print(f"{( ( df['rating']>=4.0 ) & ( df['rating']<4.5 ) ).sum()} of products (laptops) have a rating between 4.0 and 4.5")
+print(f"{( ( df['rating']>=3.5 ) & ( df['rating']<4.0 ) ).sum()} of products (laptops) have a rating between 3.5 and 4.0")
+print(f"{( ( df['rating']>=3.0 ) & ( df['rating']<3.5 ) ).sum()} of products (laptops) have a rating between 3.0 and 3.5")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Which brand has the highest average rating for its products?
+
+print("Brand below have the highest average rating for its products")
+df.groupby('brand name')['rating'].mean().nlargest(2).reset_index()
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the most common processor type (Intel/AMD) in the dataset?
+
+processor_amd_count = ( df['specifications'].str.contains('AMD',case =False) ).sum()
+
+print(f"{( df['specifications'].str.contains('AMD',case =False) ).sum()} products (laptops) have AMD type processor in the dataset")
+
+print()
+
+processor_intel_count = ( df['specifications'].str.contains('intel',case = False) ).sum()
+
+print(f"{( df['specifications'].str.contains('intel',case = False) ).sum()} products (laptops) have Intel type processor in the dataset")
+
+print()
+
+print(f'Most common processor type is {"AMD" if processor_amd_count > processor_intel_count else "intel"} in the dataset')
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# How many laptops have a discount percentage greater than 30%?
+
+( df['discount %']>30 ).sum()
+
+print(f"{( df['discount %']>30 ).sum()} products (laptops) have discount percentage greater than 30% . ")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the average number of reviews for products with a rating above 4.0?
+
+df.loc[df['rating']>4.0]['total reviews'].mean()
+print(f"Average number of reviews for products with a rating above 4.0 is {int(df.loc[df['rating']>4.0]['total reviews'].mean())} .")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the distribution of discount percentages across all products?
+
+df['discount %'].value_counts().reset_index().rename(columns={'count':'Applicable on Laptops'})
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Which brands has the highest average discount percentage?
+
+highest_discount = df.loc[df['discount %'] == df['discount %'].max()]['brand name'].unique()
+highest_discount
+
+print("Below brands have the highest average discount percentage are :")
+for i in highest_discount:
+    print(i,end="     ")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# How many laptops have zero reviews and zero ratings?
+
+cnd1 = df['total reviews']==0
+cnd2 = df['rating']==0
+
+( ( cnd1 ) & (cnd2) ).sum()
+
+print(f"{( ( cnd1 ) & (cnd2) ).sum()} laptops have zero reviews and zero ratings")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the average price for products with a rating below 3.0?
+
+price_below_3 = df.loc[ df['rating'] < 3.0 ]['price after discount']
+price_below_3
+
+if price_below_3.all():
+    print("No Products below rating 3.0")
+else:
+    result = df.loc[ df['rating'] < 3.0 ]['price after discount'].mean()
+    print(f"Average price for products with a rating below 3.0 is {result}")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the average price for products with a rating above 3.0?
+
+price_above_3 = df.loc[ df['rating'] > 3.0 ]['price after discount'].mean()
+price_above_3
+
+print(f"Average price for products with a rating below 3.0 is Rupees {int(price_above_3)} .")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+What is the relationship between the number of reviews and the number of ratings?
+
+reviews_corr_ratings = round( df['total reviews'].corr(df['rating']) , 2 )
+
+print(f"Correlation between the reviews and the ratings of the laptops is {reviews_corr_ratings} .")
+
+if 1>=reviews_corr_ratings>=0.8:
+    print(f"{reviews_corr_ratings} refers to very strong positive correlation")
+elif 0.8>=reviews_corr_ratings>=0.6:
+    print(f"{reviews_corr_ratings} refers to strong positive correlation")
+elif 0.6>=reviews_corr_ratings>=0.4:
+    print(f"{reviews_corr_ratings} refers to moderate positive correlation")
+elif 0.4>=reviews_corr_ratings>=0.2:
+    print(f"{reviews_corr_ratings} refers to weak positive correlation")
+elif 0.2>=reviews_corr_ratings>0.0:
+    print(f"{reviews_corr_ratings} refers to very weak positive correlation")
+elif reviews_corr_ratings == 0:
+    print(f"{reviews_corr_ratings} refers to no correlation")
+elif 0.0>reviews_corr_ratings>= - (0.2) :
+    print(f"{reviews_corr_ratings} refers to very weak negative correlation")
+elif - (0.2) >=reviews_corr_ratings>= - (0.4) :
+    print(f"{reviews_corr_ratings} refers to weak negative correlation")
+elif - (0.4) >=reviews_corr_ratings>= - (0.6) :
+    print(f"{reviews_corr_ratings} refers to moderate negative correlation")
+elif - (0.6) >=reviews_corr_ratings>= - (0.8) :
+    print(f"{reviews_corr_ratings} refers to strong negative correlation")
+elif - (0.8) >=reviews_corr_ratings>= - (1.0) :
+    print(f"{reviews_corr_ratings} refers to very strong negative correlation")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# How many products have a price after discount less than 30000?
+
+( df['price after discount']<30000 ).sum()
+
+print(f"{( df['price after discount']<30000 ).sum()} of products have price after discount less than Rupees 30000")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the most common RAM size among the laptops?
+
+## Extracting RAM details for specification column in dataframe df
+
+def ram(n):
+    ram = n.find('RAM')
+    if ram>0:
+        ram = n[ram-15:ram+3]
+    ram = ram.strip()
+    return ram
+
+def clean_ram(n):
+    for i in n:
+        if i in 'processor/\nenHz()0GB':
+            n = n.replace(i,"")
+    n = n[:3] + "GB" + n[2:]
+    n = n.strip()
+    return n
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## Cleaning the unnecessary strings in the RAM column
+
+def ram(n):
+    ram = n.find('RAM')
+    if ram>0:
+        ram = n[ram-15:ram+3]
+    ram = ram.strip()
+    return ram
+
+def clean_ram(n):
+    for i in n:
+        if i in 'processor/\nenHz()0GB':
+            n = n.replace(i,"")
+    n = n[:2] + "GB" + n[2:]
+    n = n.strip()
+    return n.strip()
+    
+df['RAM'] = df['specifications'].apply(ram)
+
+df['RAM'] = df['RAM'].apply(clean_ram)
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+df['RAM'].value_counts()
+
+print(f"Most common RAM size among the laptops is {df['RAM'].value_counts().idxmax()} .")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# What is the average price per gigabyte of RAM for all laptops in the dataset?
+
+## creating a new column 'RAM GB' which will have only integers representing GB of RAM for each product (laptop)
+
+def ram_gb(n):
+    num = ""
+    for i in range(0,2):
+        if n[i].isdigit():
+            num += str(n[i])
+    if num == "":
+        num = 0
+    return num
+
+df['RAM GB'] = df['RAM'].apply(ram_gb)
+df['RAM GB']
+
+df['RAM GB'] = df['RAM GB'].astype(int)
+
+df['RAM GB'].unique()
+
+print("RAM are available in :")
+for i in df['RAM GB'].unique():
+    if i != 0:
+        print(str(i) + " GB",end = "    ")
+    else:
+        continue
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+price_per_gb = df['price after discount'].sum() / df['RAM GB'].sum()
+price_per_gb
+
+print(f"Average price per gigabyte of RAM for all laptops in the dataset is Rupees {round(price_per_gb , 2)} per GB .")
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
